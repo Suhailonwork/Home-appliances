@@ -1,0 +1,230 @@
+@import "tailwindcss";
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-image: url("./img/small-cacti-with-white-wall-background.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  display: flex;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 100%;
+  max-width: 500px;
+}
+
+.form-side {
+  flex: 1;
+  padding: 40px;
+}
+
+.form-side h2 {
+  margin-bottom: 20px;
+  color: #047e1f;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  margin-top: 5px;
+  border-radius: 6px;
+  border: none;
+  border-bottom: 1px solid rgb(240, 240, 240);
+}
+
+.form-group input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.form-group a {
+  color: #333;
+  text-decoration: underline;
+}
+
+.form-group button {
+  padding: 10px 25px;
+  background-color: #047e1f;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+}
+
+.form-group button:hover {
+  background-color: #047e1f;
+}
+
+.already {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+@media screen and (max-width: 768px) {
+  .card {
+    flex-direction: column;
+  }
+
+  .image-side {
+    display: none;
+  }
+}
+
+input[type="text"]::placeholder {
+  color: rgb(189, 189, 189);
+}
+
+input[type="email"]::placeholder {
+  color: rgb(189, 189, 189);
+}
+
+input[type="password"]::placeholder {
+  color: rgb(189, 189, 189);
+}
+
+.login {
+  background: white !important;
+  border: 1px solid #047e1f !important;
+  color: black !important;
+}
+
+
+
+  .container {
+      display: flex;
+      min-height: 100vh;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .card {
+      display: flex;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .form-side {
+      flex: 1;
+      padding: 40px;
+    }
+
+    .form-side h2 {
+      margin-bottom: 20px;
+      color: #B91508 ;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border:none;
+      border-bottom: 1px solid rgb(240, 240, 240);
+
+    }
+
+    .form-group input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    .form-group a {
+      color: #333;
+      
+    }
+
+    .form-group button {
+      padding: 10px 25px;
+      background-color: #B91508;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .form-group button:hover {
+      background-color: #a21307;
+
+    }
+
+    .already {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    @media screen and (max-width: 768px) {
+      .card {
+        flex-direction: column;
+      }
+
+      .image-side {
+        display: none;
+      }
+    }
+
+    input[type='text']::placeholder{
+        color:rgb(189, 189, 189);
+    }
+
+    input[type='email']::placeholder{
+        color:rgb(189, 189, 189);
+    }
+
+    input[type='password']::placeholder{
+        color:rgb(189, 189, 189);
+    }
+
+    .login{
+        background:white !important;
+        border:1px solid #047e1f !important;
+        color:black !important;
+    }
+
+
+   .login {
+       padding: 10px 25px;
+      background-color: #047e1f;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
