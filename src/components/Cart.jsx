@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { FiShoppingCart, FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
-const Cart = ({ addcart, setaddcart }) => {
+const Cart = ({ addcart, setaddcart ,isLoggedIn }) => {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -17,16 +17,41 @@ const Cart = ({ addcart, setaddcart }) => {
   const getId = (product) => product.sno || product.product_id;
 
   // Update quantity for a cart item by id
-  const updateQuantity = (id, newQuantity) => {
-    const updatedCart = addcart.map((item) => {
-      const product = getProduct(item);
-      if (getId(product) === id) {
-        return { ...item, quantity: Math.max(1, newQuantity) };
-      }
-      return item;
-    });
-    setaddcart(updatedCart);
-  };
+const updateQuantity = async (id, newQuantity) => {
+  const updatedCart = addcart.map((item) => {
+    const product = getProduct(item);
+    if (getId(product) === id) {
+      return { ...item, quantity: Math.max(1, newQuantity) };
+    }
+    return item;
+  });
+  setaddcart(updatedCart);
+
+  if (isLoggedIn) {
+    const updatedItem = updatedCart.find(item => getId(getProduct(item)) === id);
+    const product = getProduct(updatedItem);
+
+    try {
+      await axios.post(
+        'http://localhost/summit_home_appliancies/php_controllar/contraollers/UpdateCart.php',
+        {
+          product_id: product.product_id || product.sno,
+          quantity: Math.max(1, newQuantity),
+          product_name: product.product_name,
+          product_price: product.product_price,
+          image: product.image || product.product_images,
+          mode: 'update'  // ✅ Add this line
+        },
+        { withCredentials: true }
+      );
+
+      console.log("Cart quantity updated in backend.");
+    } catch (error) {
+      console.error("Error updating quantity in backend:", error);
+    }
+  }
+};
+
 
 
 
@@ -98,8 +123,7 @@ const Cart = ({ addcart, setaddcart }) => {
     }, 1500);
   };
 
-
-  const handleDelete = async (productId) => {
+const handleDelete = async (productId) => {
   try {
     const response = await axios.post(
       "http://localhost/summit_home_appliancies/php_controllar/contraollers/DeleteCartItem.php",
@@ -108,8 +132,13 @@ const Cart = ({ addcart, setaddcart }) => {
     );
 
     if (response.data.status === "success") {
-      // Remove item locally from cartItems state
-      setaddcart(prevItems => prevItems.filter(item => item.sno !== productId));
+      // Remove item locally from cartItems state using product_id, not sno
+      setaddcart(prevItems =>
+        prevItems.filter(item => {
+          const product = item.selectedProduct || item;
+          return product.product_id !== productId;
+        })
+      );
       console.log("Item deleted successfully");
     } else {
       console.error("Failed to delete item:", response.data.message);
@@ -118,6 +147,7 @@ const Cart = ({ addcart, setaddcart }) => {
     console.error("Error deleting item:", error);
   }
 };
+
 
  
   console.log("Cart Items:", addcart);
@@ -203,6 +233,7 @@ const Cart = ({ addcart, setaddcart }) => {
                             onClick={() =>
                               updateQuantity(id, quantity - 1)
                             }
+
                             disabled={quantity <= 1}
                             className="px-2 py-1 text-gray-600 hover:bg-gray-100"
                           >
@@ -212,9 +243,8 @@ const Cart = ({ addcart, setaddcart }) => {
                             {quantity}
                           </span>
                           <button
-                            onClick={() =>
-                              updateQuantity(id, quantity + 1)
-                            }
+                       
+                            onClick={() => updateQuantity(id, quantity + 1)}
                             className="px-2 py-1 text-gray-600 hover:bg-gray-100"
                           >
                             <FiPlus size={14} />
