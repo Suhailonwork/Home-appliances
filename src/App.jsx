@@ -33,7 +33,12 @@ function App() {
     axios.get("http://localhost/summit_home_appliancies/api/products.php")
       .then(res => setProducts(res.data))
       .catch(err => console.error("Error loading products:", err));
+  
+      
   }, []);
+  useEffect(() => {
+  console.log("Fetched products:", products);
+}, [products]);
 
   // Check login status
   useEffect(() => {
@@ -106,6 +111,8 @@ function App() {
     }
   }, [cartItems, isLoggedIn]);
 
+
+  
   // Add to cart function
   const addToCart = async (product, quantity = 1) => {
     if (isLoggedIn) {

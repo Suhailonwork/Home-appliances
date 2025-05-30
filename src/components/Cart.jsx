@@ -28,14 +28,9 @@ const Cart = ({ addcart, setaddcart }) => {
     setaddcart(updatedCart);
   };
 
-  // Remove an item from cart by id
-  const removeItem = (id) => {
-    const updated = addcart.filter((item) => {
-      const product = getProduct(item);
-      return getId(product) !== id;
-    });
-    setaddcart(updated);
-  };
+
+
+
 
   // Calculate subtotal safely with fallback price and quantity
   const subtotal = addcart.reduce((sum, item) => {
@@ -103,8 +98,29 @@ const Cart = ({ addcart, setaddcart }) => {
     }, 1500);
   };
 
-  // Debug: Log cart items structure
-  // console.log("Cart Items:", addcart);
+
+  const handleDelete = async (productId) => {
+  try {
+    const response = await axios.post(
+      "http://localhost/summit_home_appliancies/php_controllar/contraollers/DeleteCartItem.php",
+      { product_id: productId },
+      { withCredentials: true }
+    );
+
+    if (response.data.status === "success") {
+      // Remove item locally from cartItems state
+      setaddcart(prevItems => prevItems.filter(item => item.sno !== productId));
+      console.log("Item deleted successfully");
+    } else {
+      console.error("Failed to delete item:", response.data.message);
+    }
+  } catch (error) {
+    console.error("Error deleting item:", error);
+  }
+};
+
+ 
+  console.log("Cart Items:", addcart);
 
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
@@ -212,7 +228,7 @@ const Cart = ({ addcart, setaddcart }) => {
 
                       <div className="col-span-1 text-right">
                         <button
-                          onClick={() => removeItem(id)}
+                          onClick={() => handleDelete(item.product_id)}
                           className="text-gray-400 hover:text-red-500"
                         >
                           <FiTrash2 />
