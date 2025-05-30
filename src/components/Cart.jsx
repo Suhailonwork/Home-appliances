@@ -28,14 +28,37 @@ const Cart = ({ addcart, setaddcart }) => {
     setaddcart(updatedCart);
   };
 
-  // Remove an item from cart by id
-  const removeItem = (id) => {
+  // // Remove an item from cart by id
+  // const removeItem = (id) => {
+  //   const updated = addcart.filter((item) => {
+  //     const product = getProduct(item);
+  //     return getId(product) !== id;
+  //   });
+  //   setaddcart(updated);
+  // };
+
+
+    const removeItem = async (id) => {
+  try {
+    // Remove from DB
+    await axios.post(
+      "http://localhost/summit_home_appliancies/php_controllar/contraollers/DeleteCartItem.php",
+      {
+        product_id: id,
+      },
+      { withCredentials: true }
+    );
+
+    // Remove from frontend state
     const updated = addcart.filter((item) => {
       const product = getProduct(item);
       return getId(product) !== id;
     });
     setaddcart(updated);
-  };
+  } catch (error) {
+    console.error("Failed to delete item from database:", error);
+  }
+};
 
   // Calculate subtotal safely with fallback price and quantity
   const subtotal = addcart.reduce((sum, item) => {
