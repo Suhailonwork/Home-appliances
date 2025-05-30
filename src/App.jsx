@@ -29,7 +29,6 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [hasSyncedLocalCart, setHasSyncedLocalCart] = useState(false);
 
-  // Fetch products
   useEffect(() => {
     axios.get("http://localhost/summit_home_appliancies/api/products.php")
       .then(res => setProducts(res.data))
@@ -41,7 +40,6 @@ function App() {
   console.log("Fetched products:", products);
 }, [products]);
 
-  // Check login status
   useEffect(() => {
     fetch('http://localhost/summit_home_appliancies/php_controllar/contraollers/CheckLogin.php', {
       credentials: 'include',
@@ -51,7 +49,6 @@ function App() {
       .catch(err => console.error("Error checking login status:", err));
   }, []);
 
-  // Sync cart when login state changes
  useEffect(() => {
   if (isLoggedIn && !hasSyncedLocalCart) {
     const localCart = localStorage.getItem("cartItems");
@@ -107,7 +104,7 @@ function App() {
   }
 }, [isLoggedIn]);
 
-  // Save cart to localStorage for guests
+  
   useEffect(() => {
     if (!isLoggedIn) {
       localStorage.setItem("cartItems", JSON.stringify(cartItems));
@@ -115,8 +112,6 @@ function App() {
   }, [cartItems, isLoggedIn]);
 
 
-  
-  // Add to cart function
   const addToCart = async (product, quantity = 1) => {
     if (isLoggedIn) {
       try {
@@ -167,7 +162,7 @@ function App() {
           element={
             <>
               <HeroSlider />
-              <Trend user={products} />
+              <Trend user={products} addToCart={addToCart} />
               <Gallery />
               <CookerFinder />
               <Discription />

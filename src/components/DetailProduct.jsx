@@ -157,26 +157,7 @@ const DetailProduct = ({ user, setaddcart, addToCart }) => {
       item.sno !== selectedProduct.sno // exclude the current product
   );
 
-// const handleAddCart = () => {
-//   setaddcart((prev) => {
-//     // Check if the product is already in the cart
-//     const existingProduct = prev.find(
-//       (item) => item.selectedProduct.sno === selectedProduct.sno
-//     );
 
-//     if (existingProduct) {
-//       // If the product exists, increase the quantity
-//       return prev.map((item) =>
-//         item.selectedProduct.sno === selectedProduct.sno
-//           ? { ...item, quantity: item.quantity + 1 }
-//           : item
-//       );
-//     } else {
-//       // If the product doesn't exist, add it to the cart
-//       return [...prev, { selectedProduct, quantity: 1 }];
-//     }
-//   });
-// };
 
 const handleAddCart = () => {
   addToCart({
