@@ -179,7 +179,7 @@ const DetailProduct = ({ user, setaddcart, addToCart }) => {
 // };
 
 const handleAddCart = () => {
-  setaddcart({
+  addToCart({
     product_id: selectedProduct.sno,
     product_name: selectedProduct.product_name,
     product_price: selectedProduct.product_price,

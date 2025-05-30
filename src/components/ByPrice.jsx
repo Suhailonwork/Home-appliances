@@ -41,7 +41,7 @@ const ByPrice = ({ user }) => {
   };
 
   return (
-    <div className="flex flex-col items-center p-4 mt-9">
+    <div className="flex flex-col items-center p-4 mt-11">
       <div className="md:w-full flex flex-col items-center ">
         <h2 className="text-2xl font-semibold">Thoughtful Picks by Price</h2>
         <p className="text-[#636365] text-[0.9rem] font-medium mt-1">
@@ -50,7 +50,7 @@ const ByPrice = ({ user }) => {
       </div>
 
       {/* Price Filter Buttons */}
-      <div className="flex flex-wrap gap-2 justify-center mb-4 mt-7">
+      <div className="flex flex-wrap gap-2 justify-center mb-4 mt-9">
         <div
           className={`px-3 py-1 rounded-full cursor-pointer text-xs ${
             selectedPrice === "all"

@@ -76,7 +76,7 @@ const Trend = ({ user }) => {
                     isSelected
                       ? "bg-[#B91508] text-white"
                       : isDisabled
-                      ? "bg-[#E9E9EB] text-gray-300 cursor-not-allowed"
+                      ? "bg-[#E9E9EB] text-[#545455] cursor-not-allowed"
                       : "bg-[#E9E9EB] text-[#545455] cursor-pointer"
                   }`}
                 onClick={() => {
