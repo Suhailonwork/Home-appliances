@@ -18,7 +18,8 @@ import { Link } from "react-router-dom";
 const Header = ({ addcart }) => {
   return (
     <div>
-      <header className=" hidden  md:flex justify-between items-center bg-[#F0F0F2] font-helv  p-3 px-16 text-black ">
+      <header className=" hidden  md:flex justify-between items-center bg-[#F0F0F2] font-[
+Helvetica Now Display]  p-3 px-16 text-black ">
         <div className="flex justify-between items-center text-sm w-96">
           <p>
             <a href="">Product Catalogue</a>
@@ -71,7 +72,17 @@ const Header = ({ addcart }) => {
               <div className="flex items-center space-x-2">
                 <FiSearch className="bg-[#F1F1F1] rounded-full text-black p-2 w-7 h-7" />
                 <span className="relative">
-                  <FiShoppingCart className="bg-[#F1F1F1] rounded-full text-black object-contain p-2 w-8 h-7 flex justify-center items-center" />
+                  <Link
+              to={"/Cart"}
+              className="relative bg-[#F1F1F1] rounded-full p-2 text-gray-950 font-normal"
+            >
+              <ShoppingCartOutlinedIcon className="" />
+              {addcart.length > 0 && (
+                <div className="text-white bg-red-700 text-xs absolute top-0 right-0 rounded-full px-1">
+                  {addcart.length}
+                </div>
+              )}
+            </Link>
                 </span>
                 <HiOutlineMenu className="w-7 h-7 text-[#1C1C1C]" />
               </div>
@@ -125,7 +136,7 @@ const Header = ({ addcart }) => {
           </div>
         </div>
         {/* -----------------------second nav bar--------------------- */}
-        <div className="hidden md:mt-5 md:flex items-center justify-between space-x-2">
+        <div className="hidden lg:mt-5 lg:flex items-center justify-between space-x-2">
           <div className="flex items-center text-sm ">
             <img src="/asset/images/Cookware.png" alt="" className="w-14" />
             <p>Cookware</p>

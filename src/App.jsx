@@ -27,8 +27,8 @@ function App() {
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [hasSyncedLocalCart, setHasSyncedLocalCart] = useState(false);
 
-  // Fetch products
   useEffect(() => {
     axios.get("http://localhost/summit_home_appliancies/api/products.php")
       .then(res => setProducts(res.data))
@@ -40,7 +40,6 @@ function App() {
   console.log("Fetched products:", products);
 }, [products]);
 
-  // Check login status
   useEffect(() => {
     fetch('http://localhost/summit_home_appliancies/php_controllar/contraollers/CheckLogin.php', {
       credentials: 'include',
@@ -50,61 +49,62 @@ function App() {
       .catch(err => console.error("Error checking login status:", err));
   }, []);
 
-  // Sync cart when login state changes
-  useEffect(() => {
-    if (isLoggedIn) {
-      const localCart = localStorage.getItem("cartItems");
-      if (localCart) {
-        const cartItemsFromLocal = JSON.parse(localCart);
+ useEffect(() => {
+  if (isLoggedIn && !hasSyncedLocalCart) {
+    const localCart = localStorage.getItem("cartItems");
+    if (localCart) {
+      const cartItemsFromLocal = JSON.parse(localCart);
 
-        // Transfer each item to DB
-        Promise.all(cartItemsFromLocal.map(item =>
-          axios.post('http://localhost/summit_home_appliancies/php_controllar/contraollers/UpdateCart.php', {
-            product_id: item.product_id,
-            quantity: item.quantity,
-            product_name: item.product_name,
-            product_price: item.product_price,
-            image: item.image,
-          }, { withCredentials: true })
-        ))
-          .then(() => {
-            localStorage.removeItem("cartItems");
-            console.log("Local cart synced to DB");
+      // Transfer each item to DB
+      Promise.all(cartItemsFromLocal.map(item =>
+        axios.post('http://localhost/summit_home_appliancies/php_controllar/contraollers/UpdateCart.php', {
+          product_id: item.product_id,
+          quantity: item.quantity,
+          product_name: item.product_name,
+          product_price: item.product_price,
+          image: item.image,
+        }, { withCredentials: true })
+      ))
+        .then(() => {
+          localStorage.removeItem("cartItems");
+          setHasSyncedLocalCart(true); // Prevent future syncs
+          console.log("Local cart synced to DB");
 
-            // Load updated cart from DB
-            return axios.get('http://localhost/summit_home_appliancies/php_controllar/contraollers/UpdateCart.php', {
-              withCredentials: true
-            });
-          })
-          .then(res => {
-            setCartItems(res.data);
-          })
-          .catch(err => {
-            console.error("Error syncing cart:", err);
+          // Load updated cart from DB
+          return axios.get('http://localhost/summit_home_appliancies/php_controllar/contraollers/UpdateCart.php', {
+            withCredentials: true
           });
-      } else {
-        // Load cart directly from DB
-        axios.get('http://localhost/summit_home_appliancies/php_controllar/contraollers/UpdateCart.php', {
-          withCredentials: true
         })
-          .then(res => setCartItems(res.data))
-          .catch(err => {
-            console.error("Error loading cart from DB:", err);
-            setCartItems([]);
-          });
-      }
+        .then(res => {
+          setCartItems(res.data);
+        })
+        .catch(err => {
+          console.error("Error syncing cart:", err);
+        });
     } else {
-      // Load from localStorage for guest
-      const storedCart = localStorage.getItem("cartItems");
-      if (storedCart) {
-        setCartItems(JSON.parse(storedCart));
-      } else {
-        setCartItems([]);
-      }
+      // Load cart directly from DB
+      axios.get('http://localhost/summit_home_appliancies/php_controllar/contraollers/UpdateCart.php', {
+        withCredentials: true
+      })
+        .then(res => setCartItems(res.data))
+        .catch(err => {
+          console.error("Error loading cart from DB:", err);
+          setCartItems([]);
+        });
     }
-  }, [isLoggedIn]);
+  } else if (!isLoggedIn) {
+    // Reset sync state and load local cart
+    setHasSyncedLocalCart(false);
+    const storedCart = localStorage.getItem("cartItems");
+    if (storedCart) {
+      setCartItems(JSON.parse(storedCart));
+    } else {
+      setCartItems([]);
+    }
+  }
+}, [isLoggedIn]);
 
-  // Save cart to localStorage for guests
+  
   useEffect(() => {
     if (!isLoggedIn) {
       localStorage.setItem("cartItems", JSON.stringify(cartItems));
@@ -112,8 +112,6 @@ function App() {
   }, [cartItems, isLoggedIn]);
 
 
-  
-  // Add to cart function
   const addToCart = async (product, quantity = 1) => {
     if (isLoggedIn) {
       try {
@@ -164,7 +162,7 @@ function App() {
           element={
             <>
               <HeroSlider />
-              <Trend user={products} />
+              <Trend user={products} addToCart={addToCart} />
               <Gallery />
               <CookerFinder />
               <Discription />
@@ -196,7 +194,7 @@ function App() {
     </>
   }
 />
-        <Route path="/cart" element={<Cart setaddcart={setCartItems} addcart={cartItems} />} />
+      <Route path="/cart" element={<Cart setaddcart={setCartItems} isLoggedIn={isLoggedIn} addcart={cartItems} />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/about" element={<About />} />

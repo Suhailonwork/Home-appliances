@@ -3,7 +3,10 @@ import React, { useState } from "react";
 import { FiShoppingCart, FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
-const Cart = ({ addcart, setaddcart }) => {
+const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
+  // Ensure addcart is always an array
+  const safeCart = Array.isArray(addcart) ? addcart : [];
+
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -17,8 +20,8 @@ const Cart = ({ addcart, setaddcart }) => {
   const getId = (product) => product.sno || product.product_id;
 
   // Update quantity for a cart item by id
-  const updateQuantity = (id, newQuantity) => {
-    const updatedCart = addcart.map((item) => {
+  const updateQuantity = async (id, newQuantity) => {
+    const updatedCart = safeCart.map((item) => {
       const product = getProduct(item);
       if (getId(product) === id) {
         return { ...item, quantity: Math.max(1, newQuantity) };
@@ -26,14 +29,36 @@ const Cart = ({ addcart, setaddcart }) => {
       return item;
     });
     setaddcart(updatedCart);
+
+    if (isLoggedIn) {
+      const updatedItem = updatedCart.find(
+        (item) => getId(getProduct(item)) === id
+      );
+      const product = getProduct(updatedItem);
+
+      try {
+        await axios.post(
+          "http://localhost/summit_home_appliancies/php_controllar/contraollers/UpdateCart.php",
+          {
+            product_id: product.product_id || product.sno,
+            quantity: Math.max(1, newQuantity),
+            product_name: product.product_name,
+            product_price: product.product_price,
+            image: product.image || product.product_images,
+            mode: "update", // ✅ Add this line
+          },
+          { withCredentials: true }
+        );
+
+        console.log("Cart quantity updated in backend.");
+      } catch (error) {
+        console.error("Error updating quantity in backend:", error);
+      }
+    }
   };
 
-
-
-
-
   // Calculate subtotal safely with fallback price and quantity
-  const subtotal = addcart.reduce((sum, item) => {
+  const subtotal = safeCart.reduce((sum, item) => {
     const product = getProduct(item);
     const price = parseFloat(product.product_price) || 0;
     const quantity = item.quantity || 1;
@@ -98,29 +123,32 @@ const Cart = ({ addcart, setaddcart }) => {
     }, 1500);
   };
 
-
   const handleDelete = async (productId) => {
-  try {
-    const response = await axios.post(
-      "http://localhost/summit_home_appliancies/php_controllar/contraollers/DeleteCartItem.php",
-      { product_id: productId },
-      { withCredentials: true }
-    );
+    try {
+      const response = await axios.post(
+        "http://localhost/summit_home_appliancies/php_controllar/contraollers/DeleteCartItem.php",
+        { product_id: productId },
+        { withCredentials: true }
+      );
 
-    if (response.data.status === "success") {
-      // Remove item locally from cartItems state
-      setaddcart(prevItems => prevItems.filter(item => item.sno !== productId));
-      console.log("Item deleted successfully");
-    } else {
-      console.error("Failed to delete item:", response.data.message);
+      if (response.data.status === "success") {
+        // Remove item locally from cartItems state using product_id, not sno
+        setaddcart((prevItems) =>
+          prevItems.filter((item) => {
+            const product = item.selectedProduct || item;
+            return product.product_id !== productId;
+          })
+        );
+        console.log("Item deleted successfully");
+      } else {
+        console.error("Failed to delete item:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting item:", error);
     }
-  } catch (error) {
-    console.error("Error deleting item:", error);
-  }
-};
+  };
 
- 
-  console.log("Cart Items:", addcart);
+  console.log("Cart Items:", safeCart);
 
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
@@ -130,11 +158,11 @@ const Cart = ({ addcart, setaddcart }) => {
             <FiShoppingCart className="mr-2" /> Your Shopping Cart
           </h1>
           <span className="ml-auto bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-            {addcart.reduce((total, item) => total + (item.quantity || 0), 0)} Items
+            {safeCart.reduce((total, item) => total + (item.quantity || 0), 0)} Items
           </span>
         </div>
 
-        {addcart.length === 0 ? (
+        {safeCart.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-lg shadow-sm">
             <div className="max-w-md mx-auto">
               <FiShoppingCart className="mx-auto h-12 w-12 text-gray-400" />
@@ -164,16 +192,18 @@ const Cart = ({ addcart, setaddcart }) => {
                   <div className="col-span-2 text-right">Total</div>
                 </div>
 
-                {addcart.map((item, i) => {
+                {safeCart.map((item, i) => {
                   const product = getProduct(item);
                   const id = getId(product);
                   const quantity = item.quantity || 1;
-                  const imageSrc = `http://localhost/summit_home_appliancies/frontend/admin/${product.product_images || product.image}`;
+                  const imageSrc = `http://localhost/summit_home_appliancies/frontend/admin/${
+                    product.product_images || product.image
+                  }`;
 
                   return (
                     <div
                       key={i}
-                      className="grid grid-cols-12 p-4 border-b border-gray-100 items-center hover:bg-gray-50 transition"
+                      className="grid grid-cols-12 p-4 border-b border-gray-100 items-center hover:bg-gray-50 transition relative"
                     >
                       <div className="col-span-5 flex items-center">
                         <img
@@ -200,9 +230,7 @@ const Cart = ({ addcart, setaddcart }) => {
                       <div className="col-span-3 flex justify-center">
                         <div className="flex items-center border border-gray-300 rounded-md">
                           <button
-                            onClick={() =>
-                              updateQuantity(id, quantity - 1)
-                            }
+                            onClick={() => updateQuantity(id, quantity - 1)}
                             disabled={quantity <= 1}
                             className="px-2 py-1 text-gray-600 hover:bg-gray-100"
                           >
@@ -212,9 +240,7 @@ const Cart = ({ addcart, setaddcart }) => {
                             {quantity}
                           </span>
                           <button
-                            onClick={() =>
-                              updateQuantity(id, quantity + 1)
-                            }
+                            onClick={() => updateQuantity(id, quantity + 1)}
                             className="px-2 py-1 text-gray-600 hover:bg-gray-100"
                           >
                             <FiPlus size={14} />
@@ -222,113 +248,96 @@ const Cart = ({ addcart, setaddcart }) => {
                         </div>
                       </div>
 
-                      <div className="col-span-1 text-right text-gray-900 font-medium">
-                        ${(product.product_price * quantity).toFixed(2)}
+                      <div className="col-span-2 text-right font-semibold text-gray-900">
+                        ${(parseFloat(product.product_price) * quantity).toFixed(2)}
                       </div>
 
-                      <div className="col-span-1 text-right">
+                      <div className="col-span-1 text-right absolute right-30">
                         <button
-                          onClick={() => handleDelete(item.product_id)}
-                          className="text-gray-400 hover:text-red-500"
+                          onClick={() => handleDelete(product.product_id || product.sno)}
+                          className="text-red-500 hover:text-red-700"
+                          title="Remove item"
                         >
-                          <FiTrash2 />
+                          <FiTrash2 size={18} />
                         </button>
                       </div>
                     </div>
                   );
                 })}
               </div>
+            </div>
 
-              {/* Coupon Box */}
-              <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Have a coupon?
-                </h3>
-                <div className="flex">
+            {/* Cart Summary */}
+            <div className="lg:w-1/3 bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-lg font-semibold mb-4">Summary</h2>
+
+              <div className="space-y-2 text-gray-700">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>${subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span>${shippingFee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Tax (8%)</span>
+                  <span>${tax.toFixed(2)}</span>
+                </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-green-600 font-semibold">
+                    <span>Discount ({appliedCoupon.code})</span>
+                    <span>- ${discount.toFixed(2)}</span>
+                  </div>
+                )}
+                <hr className="my-2" />
+                <div className="flex justify-between font-bold text-gray-900 text-lg">
+                  <span>Total</span>
+                  <span>${total.toFixed(2)}</span>
+                </div>
+              </div>
+
+              {/* Coupon Input */}
+              {!appliedCoupon ? (
+                <div className="mt-4">
                   <input
                     type="text"
-                    placeholder="Enter coupon code"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
-                    className="flex-grow border border-gray-300 rounded-l-md px-4 py-2"
+                    placeholder="Coupon code"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
                     onClick={applyCoupon}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-r-md hover:bg-blue-700"
+                    className="mt-2 w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                    disabled={!couponCode.trim()}
                   >
-                    Apply
+                    Apply Coupon
                   </button>
-                </div>
-                {appliedCoupon && (
-                  <div className="mt-4 bg-green-50 p-3 rounded-md">
-                    <div className="flex justify-between">
-                      <span className="text-green-700 text-sm">
-                        Applied: {appliedCoupon.code} ({appliedCoupon.description})
-                      </span>
-                      <button
-                        onClick={removeCoupon}
-                        className="text-green-700 hover:text-green-900 text-sm font-medium"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                )}
-                {msg && <p className="mt-2 text-sm text-red-600">{msg}</p>}
-              </div>
-            </div>
-
-            {/* Order Summary */}
-            <div className="lg:w-1/3">
-              <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
-                <h2 className="text-xl font-bold text-gray-900 mb-6 pb-2 border-b border-gray-200">
-                  Order Summary
-                </h2>
-
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="text-gray-900 font-medium">
-                      ${newtotal ? parseFloat(newtotal).toFixed(2) : subtotal.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="text-gray-900 font-medium">
-                      {shippingFee === 0 ? "Free" : `$${shippingFee.toFixed(2)}`}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Tax (8%)</span>
-                    <span className="text-gray-900 font-medium">
-                      ${tax.toFixed(2)}
-                    </span>
-                  </div>
-                  {appliedCoupon && (
-                    <div className="flex justify-between text-green-600">
-                      <span>Discount</span>
-                      <span className="font-medium">-${discount.toFixed(2)}</span>
-                    </div>
+                  {msg && (
+                    <p className="mt-2 text-sm text-red-600">{msg}</p>
                   )}
                 </div>
-
-                <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-4 mb-6">
-                  <span>Total</span>
-                  <span>
-                    ${newtotal ? parseFloat(newtotal).toFixed(2) : total.toFixed(2)}
-                  </span>
+              ) : (
+                <div className="mt-4 flex items-center justify-between bg-green-100 text-green-800 p-3 rounded-md">
+                  <span>{appliedCoupon.description}</span>
+                  <button
+                    onClick={removeCoupon}
+                    className="underline hover:text-green-600"
+                  >
+                    Remove
+                  </button>
                 </div>
+              )}
 
-                <button
-                  onClick={handleCheckout}
-                  disabled={isCheckingOut}
-                  className={`w-full py-3 text-white rounded-md ${
-                    isCheckingOut ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-                  }`}
-                >
-                  {isCheckingOut ? "Processing..." : "Checkout"}
-                </button>
-              </div>
+              {/* Checkout Button */}
+              <button
+                onClick={handleCheckout}
+                disabled={isCheckingOut || safeCart.length === 0}
+                className="mt-6 w-full bg-green-600 text-white py-3 rounded-md text-lg font-semibold hover:bg-green-700 disabled:opacity-50"
+              >
+                {isCheckingOut ? "Processing..." : "Checkout"}
+              </button>
             </div>
           </div>
         )}

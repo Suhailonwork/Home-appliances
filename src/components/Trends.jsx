@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-const Trend = ({ user }) => {
+const Trend = ({ user,addToCart }) => {
   const [index, setIndex] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const visibleCount = 1;
 
-  // Categories exactly matching product_category values (lowercase)
   const categories = [
     "combos",
     "cookware",
@@ -17,15 +16,14 @@ const Trend = ({ user }) => {
     "mixer grinder",
   ];
 
-  // Safe normalize: lowercase & trim, or empty string if falsy
+ 
   const normalize = (str) => (str ? str.toLowerCase().trim() : "");
 
-  // Categories that have at least one product
+
   const categoriesWithProducts = categories.filter((category) =>
     user.some((item) => normalize(item.product_category) === normalize(category))
   );
 
-  // Filter products by selectedCategory, or show all if none selected
   const filteredProducts = selectedCategory
     ? user.filter(
         (item) => normalize(item.product_category) === normalize(selectedCategory)
@@ -54,6 +52,16 @@ const Trend = ({ user }) => {
     setIndex(0); // reset slider position
   };
 
+const handleAddToCart = (item) => {
+  addToCart({
+    product_id: item.sno,
+    product_name: item.product_name,
+    product_price: item.product_price,
+    image: item.product_images,
+  }, 1);
+};
+
+
   return (
     <div className="px-4 py-5 md:px-16 md:py-16">
       <div className="relative">
@@ -63,7 +71,7 @@ const Trend = ({ user }) => {
         </div>
 
         {/* Filter Buttons - Desktop */}
-        <div className="hidden w-full md:w-[70%] mx-auto mt-8 text-[#545455] font-medium md:flex flex-wrap justify-center md:justify-between gap-3">
+        <div className=" w-full md:w-[70%] mx-auto mt-8 text-[#545455] font-medium flex flex-wrap justify-center md:justify-between gap-3">
           {categories.map((category) => {
             const isDisabled = !categoriesWithProducts.includes(category);
             const isSelected = normalize(selectedCategory) === normalize(category);
@@ -92,35 +100,7 @@ const Trend = ({ user }) => {
           })}
         </div>
 
-        {/* Filter Buttons - Mobile */}
-        <div className="w-full md:hidden md:w-[70%] mx-auto mt-8 text-[#545455] font-medium flex flex-col items-center md:items-start gap-2">
-          {categories.map((category) => {
-            const isDisabled = !categoriesWithProducts.includes(category);
-            const isSelected = normalize(selectedCategory) === normalize(category);
-
-            return (
-              <div
-                key={category}
-                className={`rounded-full px-2 py-0.5 text-[0.625rem] md:text-xs whitespace-nowrap text-center
-                  ${
-                    isSelected
-                      ? "bg-[#B91508] text-white"
-                      : isDisabled
-                      ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                      : "bg-[#E9E9EB] text-[#545455] cursor-pointer"
-                  }`}
-                onClick={() => {
-                  if (!isDisabled) handlefilter(category);
-                }}
-              >
-                {category
-                  .split(" ")
-                  .map((w) => w[0].toUpperCase() + w.slice(1))
-                  .join(" ")}
-              </div>
-            );
-          })}
-        </div>
+  
 
         {/* Product Slider */}
         <div className="mt-10">
@@ -132,15 +112,16 @@ const Trend = ({ user }) => {
               }}
             >
               {filteredProducts.length > 0 ? (
-                filteredProducts.map((item) => (
-                  <Link key={item.sno} to={`/879/DetailProduct/${item.sno}`}>
-                    <div className="w-42 md:w-auto p-2 md:p-4 bg-white rounded-md shadow-md">
+                filteredProducts.map((item,i) => (
+                  <div className="w-42 md:w-auto p-2 md:p-4 bg-white rounded-md md:shadow-md" key={i}>
                       <div className="flex flex-col items-center">
+                      <Link key={item.sno} to={`/879/DetailProduct/${item.sno}`} className="shadow-md">
                         <img
                           src={`http://localhost/summit_home_appliancies/frontend/admin/${item.product_images}`}
                           alt={item.product_name}
-                          className="w-9 h-9 md:w-36 md:h-36 rounded-lg mx-auto"
-                        />
+                          className="w-72 h-38 md:w-36 md:h-36 rounded-lg mx-auto"
+                        /> </Link>
+                       
                         <h2 className="text-md font-semibold truncate w-40 mt-2">
                           {item.product_name}
                         </h2>
@@ -151,7 +132,9 @@ const Trend = ({ user }) => {
                           Rs. {Math.floor(item.product_price)}
                         </p>
                         <div className="flex justify-between w-full mt-3 px-2">
-                          <button className="text-xs rounded-full px-2 py-1 text-white bg-[#B91508]">
+                          <button className="text-xs rounded-full px-2 py-1 text-white bg-[#B91508] cursor-pointer"
+                          onClick={() => handleAddToCart(item)}
+                          >
                             Add to cart
                           </button>
                           <button
@@ -163,7 +146,7 @@ const Trend = ({ user }) => {
                         </div>
                       </div>
                     </div>
-                  </Link>
+                 
                 ))
               ) : (
                 <p className="text-center w-full">No products found in this category.</p>
