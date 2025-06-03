@@ -61,8 +61,8 @@ useEffect(() => {
       if (Array.isArray(res.data)) {
         const productIds = res.data.map(item => parseInt(item.product_id));
         setWishlist(productIds);
-      } else {
-        console.error("Unexpected wishlist format", res.data);
+      } else {  
+        console.log("Unexpected wishlist format", res.data);
       }
     })
     .catch(err => {

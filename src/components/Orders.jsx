@@ -43,7 +43,8 @@ const Orders = () => {
       <ul>
         {orders.map((order) => (
           <li key={order.order_id}>
-            <strong>{order.item_name}</strong> x {order.quantity} = ₹{order.total_price}
+            <strong>{order.item_name}</strong> x {order.quantity} = ₹
+            {order.total_price}
             <br />
             Date: {order.order_date} | Status: {order.status}
           </li>

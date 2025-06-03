@@ -1,5 +1,4 @@
- 
-  import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const AccountsPage = () => {
@@ -9,9 +8,12 @@ const AccountsPage = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const res = await axios.get("http://localhost/summit_home_appliancies/php_controllar/contraollers/getUserInfo.php", {
-          withCredentials: true, // important to send cookies/session
-        });
+        const res = await axios.get(
+          "http://localhost/summit_home_appliancies/php_controllar/contraollers/getUserInfo.php",
+          {
+            withCredentials: true, // important to send cookies/session
+          }
+        );
 
         if (res.data.status === "success") {
           setUserInfo(res.data.data);
@@ -38,12 +40,17 @@ const AccountsPage = () => {
   return (
     <div>
       <h2>Welcome, {userInfo.name}</h2>
-      <p><strong>Contact:</strong> {userInfo.contact}</p>
-      <p><strong>email:</strong> {userInfo.email}</p>
-      <p><strong>Address:</strong> {userInfo.address}</p>
+      <p>
+        <strong>Contact:</strong> {userInfo.contact}
+      </p>
+      <p>
+        <strong>email:</strong> {userInfo.email}
+      </p>
+      <p>
+        <strong>Address:</strong> {userInfo.address}
+      </p>
     </div>
   );
 };
-
 
 export default AccountsPage;
