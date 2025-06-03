@@ -1,10 +1,11 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { FiShoppingCart, FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
-  // Ensure addcart is always an array
+  const navigate = useNavigate();
+
   const safeCart = Array.isArray(addcart) ? addcart : [];
 
   const [couponCode, setCouponCode] = useState("");
@@ -13,13 +14,9 @@ const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
   const [msg, setMsg] = useState("");
   const [newtotal, setnewtotal] = useState(null);
 
-  // Helper: Normalize product from item, fallback to item if no selectedProduct
   const getProduct = (item) => item.selectedProduct || item;
-
-  // Helper: Get product ID - support both 'sno' or 'product_id'
   const getId = (product) => product.sno || product.product_id;
 
-  // Update quantity for a cart item by id
   const updateQuantity = async (id, newQuantity) => {
     const updatedCart = safeCart.map((item) => {
       const product = getProduct(item);
@@ -45,11 +42,10 @@ const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
             product_name: product.product_name,
             product_price: product.product_price,
             image: product.image || product.product_images,
-            mode: "update", // ✅ Add this line
+            mode: "update",
           },
           { withCredentials: true }
         );
-
         console.log("Cart quantity updated in backend.");
       } catch (error) {
         console.error("Error updating quantity in backend:", error);
@@ -57,7 +53,6 @@ const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
     }
   };
 
-  // Calculate subtotal safely with fallback price and quantity
   const subtotal = safeCart.reduce((sum, item) => {
     const product = getProduct(item);
     const price = parseFloat(product.product_price) || 0;
@@ -70,7 +65,6 @@ const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
   const discount = appliedCoupon ? subtotal * appliedCoupon.discount : 0;
   const total = subtotal + shippingFee + tax - discount;
 
-  // Apply coupon code
   const applyCoupon = async () => {
     try {
       const res = await axios.post(
@@ -108,14 +102,19 @@ const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
     setCouponCode("");
   };
 
-  // Remove applied coupon
   const removeCoupon = () => {
     setAppliedCoupon(null);
     setMsg("");
   };
 
-  // Handle checkout button click
+  // ✅ Checkout logic with login check
   const handleCheckout = () => {
+    if (!isLoggedIn) {
+      localStorage.setItem("redirectAfterLogin", "/checkout");
+      navigate("/login");
+      return;
+    }
+
     setIsCheckingOut(true);
     setTimeout(() => {
       alert("Order placed successfully!");
@@ -132,7 +131,6 @@ const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
       );
 
       if (response.data.status === "success") {
-        // Remove item locally from cartItems state using product_id, not sno
         setaddcart((prevItems) =>
           prevItems.filter((item) => {
             const product = item.selectedProduct || item;
@@ -147,8 +145,6 @@ const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
       console.error("Error deleting item:", error);
     }
   };
-
-  console.log("Cart Items:", safeCart);
 
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
@@ -254,7 +250,9 @@ const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
 
                       <div className="col-span-1 text-right absolute right-30">
                         <button
-                          onClick={() => handleDelete(product.product_id || product.sno)}
+                          onClick={() =>
+                            handleDelete(product.product_id || product.sno)
+                          }
                           className="text-red-500 hover:text-red-700"
                           title="Remove item"
                         >
@@ -297,7 +295,7 @@ const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
                 </div>
               </div>
 
-              {/* Coupon Input */}
+              {/* Coupon Code */}
               {!appliedCoupon ? (
                 <div className="mt-4">
                   <input
@@ -330,7 +328,7 @@ const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
                 </div>
               )}
 
-              {/* Checkout Button */}
+              {/* ✅ Checkout Button */}
               <button
                 onClick={handleCheckout}
                 disabled={isCheckingOut || safeCart.length === 0}

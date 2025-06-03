@@ -22,6 +22,9 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import About from "./components/About";
 import { Contactus } from "./components/Contactus";
+import { Checkout } from "./components/Checkout";
+import  AccountsPage  from "./components/AccountsPage";
+import { Imran } from "./components/Imran";
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -199,6 +202,9 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contactus />} />
+         <Route path="/checkout" element={<Checkout/>} />
+          <Route path="/accountsPage" element={<AccountsPage/>} />
+          <Route path="/trail" element={<Imran/>} />
       </Routes>
       <Footer />
     </>
