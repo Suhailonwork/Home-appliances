@@ -71,7 +71,7 @@ const handleAddToCart = (item) => {
         </div>
 
         {/* Filter Buttons - Desktop */}
-        <div className=" w-full md:w-[70%] mx-auto mt-8 text-[#545455] font-medium flex flex-wrap justify-center md:justify-between gap-3">
+        <div className=" w-full md:w-[70%] mx-auto mt-8 text-[#545455] font-medium flex flex-wrap justify-center gap-3">
           {categories.map((category) => {
             const isDisabled = !categoriesWithProducts.includes(category);
             const isSelected = normalize(selectedCategory) === normalize(category);

@@ -45,6 +45,29 @@ const Login = () => {
     }
   };
 
+  const handlelogout = async () => {
+  try {
+    const res = await axios.get(
+      "http://localhost/summit_home_appliancies/php_controllar/contraollers/logout.php",
+      { withCredentials: true } // Send cookies (PHPSESSID)
+    );
+
+    if (res.data.status === "success") {
+      setMsg("Logged out successfully.");
+      // Redirect or refresh UI
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
+    } else {
+      setMsg("Logout failed.");
+    }
+  } catch (error) {
+    console.error("Logout error:", error);
+    setMsg("Something went wrong during logout.");
+  }
+};
+
+
   return (
     <div className="container">
       <div className="card">
@@ -88,6 +111,7 @@ const Login = () => {
               
             </Link>
           </div>
+          <div className="cursor-pointer" onClick={handlelogout}>Logout</div>
         </div>
       </div>
     </div>
