@@ -106,22 +106,78 @@ const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
     setAppliedCoupon(null);
     setMsg("");
   };
+const placeOrder = async () => {
+  try {
+    for (const item of safeCart) {
+      const product = getProduct(item);
+      const quantity = item.quantity || 1;
+      const price = parseFloat(product.product_price) || 0;
 
-  // ✅ Checkout logic with login check
-  const handleCheckout = () => {
-    if (!isLoggedIn) {
-      localStorage.setItem("redirectAfterLogin", "/checkout");
-      navigate("/login");
-      return;
+      const formData = new URLSearchParams();
+      formData.append("item_name", product.product_name);
+      formData.append("quantity", quantity);
+      formData.append("price", price);
+
+      const res = await axios.post(
+        "http://localhost/summit_home_appliancies/php_controllar/contraollers/placemyorder.php",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (res.data.status !== "success") {
+        throw new Error(res.data.message || "Failed to place order");
+      }
     }
 
-    setIsCheckingOut(true);
-    setTimeout(() => {
-      alert("Order placed successfully!");
-      setIsCheckingOut(false);
-    }, 1500);
-  };
+    return true;
+  } catch (error) {
+    console.error("Order placement error:", error);
+    return false;
+  }
+};
 
+  // ✅ Checkout logic with login check
+  // const handleCheckout = () => {
+  //   if (!isLoggedIn) {
+  //     localStorage.setItem("redirectAfterLogin", "/checkout");
+  //     navigate("/login");
+  //     return;
+  //   }
+
+  //   setIsCheckingOut(true);
+  //   setTimeout(() => {
+  //     alert("Order placed successfully!");
+  //     setIsCheckingOut(false);
+  //   }, 1500);
+  // };
+const handleCheckout = async () => {
+  if (!isLoggedIn) {
+    localStorage.setItem("redirectAfterLogin", "/checkout");
+    navigate("/login");
+    return;
+  }
+
+  setIsCheckingOut(true);
+
+  const success = await placeOrder();
+
+  if (success) {
+    alert("Order placed successfully!");
+    setaddcart([]); // clear cart
+  } else {
+    alert("Order failed. Please try again.");
+  }
+
+  setIsCheckingOut(false);
+};
+
+
+  
   const handleDelete = async (productId) => {
     try {
       const response = await axios.post(

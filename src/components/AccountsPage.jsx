@@ -1,62 +1,49 @@
-import React, { useEffect, useState } from "react";
+ 
+  import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const AccountsPage = () => {
   const [userInfo, setUserInfo] = useState(null);
-  const [cartItems, setCartItems] = useState([]);
+  const [msg, setMsg] = useState("");
 
   useEffect(() => {
-    axios
-      .get("http://localhost/summit_home_appliancies/php_controllar/contraollers/GetUserCartDetails.php", {
-        withCredentials: true, // send session cookie
-      })
-      .then((res) => {
-      if (res.data.status === "success") {
-  setUserInfo(res.data.user);
-  setCartItems(res.data.cart);
-}else {
-  alert(res.data.message || "Something went wrong."); // safer fallback
-}
-      })
-      .catch((err) => {
-        console.error("Failed to fetch user/cart info:", err);
-      });
+    const fetchUserInfo = async () => {
+      try {
+        const res = await axios.get("http://localhost/summit_home_appliancies/php_controllar/contraollers/getUserInfo.php", {
+          withCredentials: true, // important to send cookies/session
+        });
+
+        if (res.data.status === "success") {
+          setUserInfo(res.data.data);
+        } else {
+          setMsg(res.data.message || "Failed to fetch user info.");
+        }
+      } catch (error) {
+        console.error(error);
+        setMsg("Something went wrong while fetching user info.");
+      }
+    };
+
+    fetchUserInfo();
   }, []);
 
-  if (!userInfo) return <div>Loading...</div>;
+  if (msg) {
+    return <p style={{ color: "red" }}>{msg}</p>;
+  }
+
+  if (!userInfo) {
+    return <p>Loading your info...</p>;
+  }
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">User Information</h2>
-      <div className="mb-6">
-        <p><strong>Name:</strong> {userInfo.name}</p>
-        <p><strong>Email:</strong> {userInfo.email}</p>
-        <p><strong>Phone:</strong> {userInfo.phone}</p>
-        {/* Add more fields if available */}
-      </div>
-
-      <h2 className="text-xl font-bold mb-4">Cart Items</h2>
-      {cartItems.length === 0 ? (
-        <p>No items in cart.</p>
-      ) : (
-        <ul className="space-y-4">
-          {cartItems.map((item, index) => (
-            <li key={index} className="border p-3 rounded-md">
-              <p><strong>Product:</strong> {item.product_name}</p>
-              <p><strong>Price:</strong> ₹{item.product_price}</p>
-              <p><strong>Quantity:</strong> {item.quantity}</p>
-              <p><strong>Total:</strong> ₹{item.total}</p>
-              <img
-                src={`http://localhost/summit_home_appliancies/frontend/admin/${item.image}`}
-                alt={item.product_name}
-                className="w-20 h-20 object-cover mt-2"
-              />
-            </li>
-          ))}
-        </ul>
-      )}
+    <div>
+      <h2>Welcome, {userInfo.name}</h2>
+      <p><strong>Contact:</strong> {userInfo.contact}</p>
+      <p><strong>email:</strong> {userInfo.email}</p>
+      <p><strong>Address:</strong> {userInfo.address}</p>
     </div>
   );
 };
+
 
 export default AccountsPage;

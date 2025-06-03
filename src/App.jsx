@@ -24,7 +24,9 @@ import About from "./components/About";
 import { Contactus } from "./components/Contactus";
 import { Checkout } from "./components/Checkout";
 import  AccountsPage  from "./components/AccountsPage";
-import { Imran } from "./components/Imran";
+
+import Orders from "./components/Orders";
+import { Wishlist } from "./components/Wishlist";
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -155,6 +157,7 @@ function App() {
       setCartItems(updatedCart);
     }
   };
+  
 
   return (
     <>
@@ -165,7 +168,7 @@ function App() {
           element={
             <>
               <HeroSlider />
-              <Trend user={products} addToCart={addToCart} />
+              <Trend user={products} userId={isLoggedIn} addToCart={addToCart} />
               <Gallery />
               <CookerFinder />
               <Discription />
@@ -204,7 +207,8 @@ function App() {
         <Route path="/contact" element={<Contactus />} />
          <Route path="/checkout" element={<Checkout/>} />
           <Route path="/accountsPage" element={<AccountsPage/>} />
-          <Route path="/trail" element={<Imran/>} />
+          <Route path="/myorders" element={<Orders/>} />
+          <Route path="/wishlist" element={<Wishlist/>} />
       </Routes>
       <Footer />
     </>

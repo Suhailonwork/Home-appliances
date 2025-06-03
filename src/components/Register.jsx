@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import axios from "axios";
-import "../App.css";
 import { Link } from "react-router-dom";
 
 const Register = () => {
@@ -8,7 +7,7 @@ const Register = () => {
     name: "",
     email: "",
     contact: "",
-    Address: "",
+    address: "",  // single address input
     password: "",
     confirmPassword: "",
     agreed: false,
@@ -30,9 +29,9 @@ const Register = () => {
   };
 
   const handleRegister = async () => {
-    const { name, email, contact, Address, password, confirmPassword, agreed } = form;
+    const { name, email, contact, address, password, confirmPassword, agreed } = form;
 
-    if (!name || !email || !password || !confirmPassword || !contact || !Address) {
+    if (!name || !email || !contact || !address || !password || !confirmPassword) {
       setMsg("Please fill all fields");
       return;
     }
@@ -59,13 +58,14 @@ const Register = () => {
           name,
           email,
           contact,
-          Address,
+          address,
           password,
         }),
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
+          withCredentials: true,
         }
       );
 
@@ -77,7 +77,7 @@ const Register = () => {
           name: "",
           email: "",
           contact: "",
-          Address: "",
+          address: "",
           password: "",
           confirmPassword: "",
           agreed: false,
@@ -108,7 +108,14 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <input type="text" placeholder="Address" name="Address" value={form.Address} onChange={handleChange} />
+            <input
+              type="text"
+              placeholder="Address (House no, Area, City, Pincode)"
+              name="address"
+              value={form.address}
+              onChange={handleChange}
+            />
+            <small>Enter full address separated by commas</small>
           </div>
 
           <div className="form-group">
@@ -116,7 +123,13 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <input type="password" placeholder="Repeat your password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} />
+            <input
+              type="password"
+              placeholder="Repeat your password"
+              name="confirmPassword"
+              value={form.confirmPassword}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="form-group">
@@ -129,8 +142,12 @@ const Register = () => {
           <p id="msg" style={{ color: msg.includes("success") ? "green" : "red" }}>{msg}</p>
 
           <div className="form-group space-x-3">
-            <button type="button" onClick={handleRegister}>Register</button>
-            <Link to="/login" className="login">Login</Link>
+            <button type="button" onClick={handleRegister}>
+              Register
+            </button>
+            <Link to="/login" className="login">
+              Login
+            </Link>
           </div>
         </div>
       </div>
