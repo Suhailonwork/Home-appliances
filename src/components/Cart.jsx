@@ -106,24 +106,57 @@ const Cart = ({ addcart, setaddcart, isLoggedIn }) => {
     setAppliedCoupon(null);
     setMsg("");
   };
+// const placeOrder = async () => {
+//   try {
+//     for (const item of safeCart) {
+//       const product = getProduct(item);
+
+//       const res = await axios.post(
+//         "http://localhost/summit_home_appliancies/php_controllar/contraollers/placemyorder.php",
+//         {
+//           item_name: product.product_name,
+//           quantity: item.quantity,
+//           price: product.product_price,
+//         },
+//         {
+//           headers: {
+//             "Content-Type": "application/json",
+//           },
+//           withCredentials: true,
+//         }
+//       );
+
+//       if (res.data.status !== "success") {
+//         throw new Error(res.data.message || "Failed to place order");
+//       }
+//     }
+
+//     return true;
+//   } catch (error) {
+//     console.error("Order placement error:", error);
+//     return false;
+//   }
+// };
+
 const placeOrder = async () => {
   try {
     for (const item of safeCart) {
       const product = getProduct(item);
-      const quantity = item.quantity || 1;
-      const price = parseFloat(product.product_price) || 0;
 
-      const formData = new URLSearchParams();
+      const formData = new FormData();
       formData.append("item_name", product.product_name);
-      formData.append("quantity", quantity);
-      formData.append("price", price);
+      formData.append("quantity", item.quantity);
+      formData.append("price", product.product_price);
+    formData.append("image_path", product.product_images || product.image);
+
+// product.image should be a File or Blob object
 
       const res = await axios.post(
         "http://localhost/summit_home_appliancies/php_controllar/contraollers/placemyorder.php",
         formData,
         {
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "multipart/form-data",
           },
           withCredentials: true,
         }
@@ -141,20 +174,9 @@ const placeOrder = async () => {
   }
 };
 
-  // ✅ Checkout logic with login check
-  // const handleCheckout = () => {
-  //   if (!isLoggedIn) {
-  //     localStorage.setItem("redirectAfterLogin", "/checkout");
-  //     navigate("/login");
-  //     return;
-  //   }
 
-  //   setIsCheckingOut(true);
-  //   setTimeout(() => {
-  //     alert("Order placed successfully!");
-  //     setIsCheckingOut(false);
-  //   }, 1500);
-  // };
+
+
 const handleCheckout = async () => {
   if (!isLoggedIn) {
     localStorage.setItem("redirectAfterLogin", "/checkout");

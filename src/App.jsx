@@ -181,10 +181,31 @@ function App() {
       setCartItems(updatedCart);
     }
   };
+   const handlelogout = async () => {
+  try {
+    const res = await axios.get(
+      "http://localhost/summit_home_appliancies/php_controllar/contraollers/logout.php",
+      { withCredentials: true } // Send cookies (PHPSESSID)
+    );
+
+    if (res.data.status === "success") {
+      setMsg("Logged out successfully.");
+      // Redirect or refresh UI
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
+    } else {
+      setMsg("Logout failed.");
+    }
+  } catch (error) {
+    console.error("Logout error:", error);
+    setMsg("Something went wrong during logout.");
+  }
+};
 
   return (
     <>
-      <Header addcart={cartItems} />
+      <Header addcart={cartItems} isLoggedIn={isLoggedIn} handlelogout={handlelogout} />
       <Routes>
         <Route
           path="/"
@@ -240,7 +261,7 @@ function App() {
             />
           }
         />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login handlelogout={handlelogout}/>} />
         <Route path="/register" element={<Register />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contactus />} />

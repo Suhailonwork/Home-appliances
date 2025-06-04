@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FaRandom,
   FaRegUser,
@@ -14,18 +14,32 @@ import { FaShop } from "react-icons/fa6";
 import { FiPhoneCall } from "react-icons/fi";
 import { FiSearch } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import AccountsPage from "./AccountsPage";
+import Orders from "./Orders";
 
-const Header = ({ addcart }) => {
+const Header = ({ addcart, isLoggedIn, handlelogout }) => {
+  const [hide, setHide] = useState(true);
+  const [activeindex, setActive] = useState(null);
+  const items = [
+    "ACCOUNT MAIN",
+    "ORDERS HISTORY",
+    "MY WISHLIST",
+    "PROFILE SETTING",
+    "TRANSACTION",
+    "MY CART",
+  ];
   return (
-    <div>
-      <header className=" hidden  md:flex justify-between items-center bg-[#F0F0F2] font-[
-Helvetica Now Display]  p-3 px-16 text-black ">
+    <div className="relative">
+      <header
+        className=" hidden  md:flex justify-between items-center bg-[#F0F0F2] font-[
+Helvetica Now Display]  p-3 px-16 text-black "
+      >
         <div className="flex justify-between items-center text-sm w-96">
           <p>
             <a href="">Product Catalogue</a>
           </p>
           <p>
-           <Link to={"/about"}>About us</Link>
+            <Link to={"/about"}>About us</Link>
           </p>
           <p>
             <Link to={"/contact"}>Contact us</Link>
@@ -45,6 +59,75 @@ Helvetica Now Display]  p-3 px-16 text-black ">
             </a>
             1800 419 6048
           </p>
+        </div>
+        <div
+          className={
+            hide
+              ? "hidden"
+              : "px-4 pt-10 fixed top-0 left-0 w-full h-full bg-gray-100 bg-opacity-90 z-[9999] "
+          }
+          onChange={() => setHide(!hide)}
+        >
+          <p
+            className="text-gray-500 cursor-pointer absolute top-5 right-10 "
+            onClick={() => setHide(!hide)}
+          >
+            X
+          </p>
+          <div className="flex">
+            <div className="w-62  pr-5 text-xs text-gray-500 font-semibold">
+              <ul className="flex flex-col  gap-1 cursor-pointer ">
+                {items.map((item, i) => {
+                  if (item === "MY CART") {
+                    return (
+                      <li key={i} onClick={() => setActive(i)} className={`w-full pl-4 pr-10 py-2 rounded transition-all duration-200 ${
+                    activeindex === i
+                      ? "bg-[#B91508] text-white"
+                      : ""
+                  }`}> 
+                        <Link to="/Cart"  onClick={() => setHide(!hide)}>
+                          {item}
+                        </Link>
+                      </li>
+                    );
+                  }
+                  return (
+                    <li
+                      key={i}
+                      className={`pl-4 pr-10 py-2 rounded transition-all duration-200 ${
+                        activeindex === i ? "bg-[#B91508] text-white" : ""
+                      }`}
+                      onClick={() => setActive(i)}
+                    >
+                      {item}
+                    </li>
+                  );
+                })}
+                <li
+                  className={`pl-4 pr-10 py-2 rounded transition-all duration-200 ${
+                    activeindex === items.length
+                      ? "bg-[#B91508] text-white"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setActive(items.length);
+                  }}
+                >
+                  {isLoggedIn ? (
+                    <span onClick={handlelogout}> LOG OUT</span>
+                  ) : (
+                    <Link to={"/login"} onClick={() => setHide(!hide)}>
+                      LOG IN
+                    </Link>
+                  )}
+                </li>
+              </ul>
+            </div>
+            <div className="p-8 border border-gray-300 w-full rounded-md  bg-white">
+              <AccountsPage></AccountsPage>
+              <Orders />
+            </div>
+          </div>
         </div>
       </header>
       {/* -----------------------Header End---------------------------------- */}
@@ -73,16 +156,16 @@ Helvetica Now Display]  p-3 px-16 text-black ">
                 <FiSearch className="bg-[#F1F1F1] rounded-full text-black p-2 w-7 h-7" />
                 <span className="relative">
                   <Link
-              to={"/Cart"}
-              className="relative bg-[#F1F1F1] rounded-full p-2 text-gray-950 font-normal"
-            >
-              <ShoppingCartOutlinedIcon className="" />
-              {addcart.length > 0 && (
-                <div className="text-white bg-red-700 text-xs absolute top-0 right-0 rounded-full px-1">
-                  {addcart.length}
-                </div>
-              )}
-            </Link>
+                    to={"/Cart"}
+                    className="relative bg-[#F1F1F1] rounded-full p-2 text-gray-950 font-normal"
+                  >
+                    <ShoppingCartOutlinedIcon className="" />
+                    {addcart.length > 0 && (
+                      <div className="text-white bg-red-700 text-xs absolute top-0 right-0 rounded-full px-1">
+                        {addcart.length}
+                      </div>
+                    )}
+                  </Link>
                 </span>
                 <HiOutlineMenu className="w-7 h-7 text-[#1C1C1C]" />
               </div>
@@ -127,12 +210,15 @@ Helvetica Now Display]  p-3 px-16 text-black ">
                 </div>
               )}
             </Link>
-            <Link
+            {/* <Link
               to={"/login"}
               className="bg-[#F1F1F1] rounded-full p-2 text-gray-950 font-normal"
-            >
-              <FaRegUser />
-            </Link>
+            > */}
+            <FaRegUser
+              onClick={() => setHide(!hide)}
+              className="cursor-pointer"
+            />
+            {/* </Link> */}
           </div>
         </div>
         {/* -----------------------second nav bar--------------------- */}

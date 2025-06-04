@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { FaPencilAlt,FaMapMarkerAlt  } from 'react-icons/fa';
+
 import axios from "axios";
 
 const AccountsPage = () => {
@@ -38,17 +40,21 @@ const AccountsPage = () => {
   }
 
   return (
-    <div>
-      <h2>Welcome, {userInfo.name}</h2>
-      <p>
-        <strong>Contact:</strong> {userInfo.contact}
-      </p>
-      <p>
-        <strong>email:</strong> {userInfo.email}
-      </p>
-      <p>
-        <strong>Address:</strong> {userInfo.address}
-      </p>
+    <div className="">
+      <div className="flex items-center"><div><img src="/asset/images/user.png" alt="" className="w-22 mt-1"/></div>
+      <div><h2 className="text-base font-semibold text-gray-600">Hey, {userInfo.name}</h2><p className="flex text-gray-500 text-sm">Email: {userInfo.email}, Phone: {userInfo.contact} <FaPencilAlt className="ml-3"/></p></div>
+    </div>
+  <div className="border-t border-gray-300 mt-2 w-full" />
+  <div className="py-5">
+      <div className=" border border-gray-300 bg-gray-100 w-1/3 h-18 rounded-md flex flex-col items-center justify-center">
+    <p className="flex items-center text-gray-500"><FaMapMarkerAlt className="text-gray-400"/> {userInfo.address}</p>
+  </div>
+   <div className="border border-gray-300 bg-gray-100 w-1/6 mt-5 rounded-md flex flex-col items-center justify-center">
+    <p className="flex items-center text-gray-500 py-1 text-sm ">+ ADD NEW ADDRESS</p>
+  </div>
+  </div>
+
+    <div className="border-t border-gray-300 mt-2 w-full" />
     </div>
   );
 };

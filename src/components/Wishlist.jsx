@@ -10,7 +10,6 @@ export const Wishlist = ({ user }) => {
         "http://localhost/summit_home_appliancies/php_controllar/contraollers/wishlistupload.php?action=get"
       )
       .then((res) => {
-        console.log("Wishlist response:", res.data);
         if (Array.isArray(res.data)) {
           const productIds = res.data.map((item) => parseInt(item.product_id));
           setWishIds(productIds);
@@ -23,30 +22,39 @@ export const Wishlist = ({ user }) => {
       });
   }, []);
 
-  // Ensure types match (convert item.sno to int)
   const wishlistItems = user.filter((item) =>
     wishIds.includes(parseInt(item.sno))
   );
 
-  // Debug logs
-  console.log("Wish IDs:", wishIds);
-  console.log("User prop:", user);
-  console.log("Matched wishlist items:", wishlistItems);
-
   return (
-    <div>
-      <h2>Your Wishlist</h2>
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Your Wishlist</h2>
+
       {wishlistItems.length > 0 ? (
-        wishlistItems.map((item) => (
-          <div key={item.sno}>
-            <h4>{item.product_description}</h4>
-            <p>ID: {item.sno}</p>
-            {/* Add more details if available: price, image, etc. */}
-          </div>
-        ))
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {wishlistItems.map((item) => (
+            <div
+              key={item.sno}
+              className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200"
+            >
+              <img
+                src={`http://localhost/summit_home_appliancies/frontend/admin/${item.product_images}`}
+                alt={item.product_description}
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4">
+                <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                  {item.product_description}
+                </h4>
+                <p className="text-sm text-gray-500">Product ID: {item.sno}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
-        <p>No items in your wishlist.</p>
+        <p className="text-gray-500 text-center mt-10">No items in your wishlist.</p>
       )}
     </div>
   );
 };
+  
